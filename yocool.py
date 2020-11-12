@@ -23,6 +23,7 @@ newest_info_url = 'https://api.pcrlink.cn/yocool/yocool_info.json'
 
 git_yocool_releases = 'https://github.com/A-kirami/YoCool/releases/download/'
 
+themes_0 = '主题未设置'
 themes_PA = 'PrincessAdventure'
 themes_CL = 'CoolLite'
 
@@ -55,14 +56,14 @@ async def get_yocool_file(newest_tag,themes):
 
 def get_yocool_themes(select) -> str:
     '''
-    选择主题
+    获取主题对应名称
     '''
     if select == 1:
         themes = themes_PA
     elif select == 2:
         themes = themes_CL
     else:
-        themes = 0
+        themes = themes_0
     return themes
 
 
