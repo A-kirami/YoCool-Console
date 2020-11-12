@@ -223,8 +223,44 @@ async def initialization(session):
     hoshino.logger.info(f'使用YoCool默认主题{themes}')
     await session.finish(f'初始化完成！\nYoCool主题已设置为默认：{themes}')
 
-#@on_command('检查更新', only_to_me=False)
-#@on_command('一键安装', only_to_me=False)
+@on_command('一键安装', only_to_me=False)
+async def one_key_yocool(session):
+    if not priv.check_priv(session.event, priv.SUPERUSER):
+        return
+    ins = get_install_state()
+    if ins == 1:
+        await session.finish('您已经安装过了，如需更新请发送【更新YoCool】')
+    hoshino.logger.info('正在进行安装前初始化')
+    if not os.path.exists(current_info_path):
+        newest_yocool_ver = await aiorequests.get(url=newest_info_url)
+        if newest_yocool_ver.status_code != 200:
+            hoshino.logger.error(f'获取YoCool版本信息时发生错误{newest_yocool_ver.status_code}')
+            await session.send(f'获取YoCool版本信息时发生错误{newest_yocool_ver.status_code}')
+        yocool_info_json = await newest_yocool_ver.json()
+        with open(current_info_path, 'w+', encoding='utf-8-sig') as f:
+            json.dump(yocool_info_json, f, indent=4, ensure_ascii=False)
+    with open(current_info_path, 'r', encoding='utf-8-sig') as f:
+        current_updata_json = json.load(f)
+    current_updata_json['Themes'] = select = 1
+    with open(current_info_path, 'w+', encoding='utf-8-sig') as f:
+        json.dump(current_updata_json, f, indent=4, ensure_ascii=False)
+    themes = get_yocool_themes(select)
+    hoshino.logger.info(f'使用YoCool默认主题{themes}')
+    try:
+        status, version, updatenote = await update_yocool()
+    except:
+        await session.send('安装异常中断，请排查问题后再次尝试')
+    if status == 0:
+        await session.finish('本地版本信息异常！')
+    elif status < 1000:
+        await session.finish(f'发生错误{status}')
+    else:
+        with open(current_info_path, 'r', encoding='utf-8-sig') as f:
+            current_updata_json = json.load(f)
+        current_updata_json['Install'] = 1
+        with open(current_info_path, 'w+', encoding='utf-8-sig') as f:
+            json.dump(current_updata_json, f, indent=4, ensure_ascii=False)
+        await session.finish(f'一键安装已完成！\n当前YoCool版本：YoCool-{version}\n更新日志：\n{updatenote}\n*电脑端请使用Ctrl+F5强制刷新浏览器缓存，移动端请在浏览器设置中清除缓存')
 
 THEMES_NAME_TIP = '请选择主题设置！'
 
