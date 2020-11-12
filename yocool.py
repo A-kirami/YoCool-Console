@@ -1,5 +1,5 @@
 # -*- coding: utf-8-sig -*-
-import hoshino, os, json, shutil, requests, zipfile, aiohttp, asyncio
+import hoshino, os, json, shutil, requests, zipfile, aiohttp, asyncio, glob
 from os import stat
 from nonebot import on_command, get_bot, scheduler
 from requests.sessions import session
@@ -9,7 +9,7 @@ from hoshino import aiorequests, priv, util
 # 自动更新结果是否通知主人
 NOTICE = False
 
-work_dir = './hoshino/modules/yocool/'
+path = './hoshino/modules/yocool/'
 
 yobot_themes_path = './hoshino/modules/yobot/yobot/src/client/public'
 
@@ -35,25 +35,25 @@ async def get_yocool_file(newest_tag,themes):
     response = requests.get(download_url, stream=True, timeout=10)
     if response.status_code != 200:
         hoshino.logger.error(f'下载YoCool最新版本时发生错误{response.status_code}')
-    with open(work_dir + '/' + download_url.split('/')[-1], 'wb') as f:
+    with open(path + '/' + download_url.split('/')[-1], 'wb') as f:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
                 f.write(chunk)
         hoshino.logger.info(f'{themes}主题已下载完成')
-    hoshino.logger.info(f'开始解压缩{themes}文件')
-    zip_files = [file for file in os.listdir(work_dir) if file.endswith('.zip')]
+    hoshino.logger.info('开始解压缩主题文件')
+    zip_files = [file for file in os.listdir(path) if file.endswith('.zip')]
     for zfile in zip_files:
-        f = zipfile.ZipFile(os.path.join(work_dir, zfile),'r')
+        f = zipfile.ZipFile(os.path.join(path, zfile),'r')
         for file in f.namelist():
-            f.extract(file,os.path.join(work_dir, zfile[:-4]))
-    hoshino.logger.info(f'{themes}主题文件解压完成')
-    src = work_dir + 'YoCool-' + newest_tag + '-' + themes + '-plugin'
-    dst = work_dir + 'public'
+            f.extract(file,os.path.join(path, zfile[:-4]))
+    hoshino.logger.info('主题文件解压完成')
+    src = path + 'YoCool-' + newest_tag + '-' + themes + '-plugin'
+    dst = path + 'public'
     os.rename(src, dst)
-    hoshino.logger.info(f'{themes}主题文件准备完毕！')
+    hoshino.logger.info('主题文件准备完毕！')
 
 
-def get_yocool_themes(select):
+def get_yocool_themes(select) -> str:
     '''
     选择主题
     '''
@@ -155,13 +155,13 @@ async def update_yocool(force=False) -> str:
         # 指定强制更新
         current_ver = 0
     if newest_ver <= current_ver:
-        return 0, newest_tag, newest_udn
+        newest_ver = 0
+        return newest_ver, newest_tag, newest_udn
 
     # 获取本地设置主题
     hoshino.logger.info('检查本地主题配置')
     select = get_current_tms()
-    theme = get_yocool_themes(select)
-    themes = str(theme)
+    themes = get_yocool_themes(select)
     hoshino.logger.info(f'本地主题当前配置：{themes}')
 
     # 下载文件
@@ -178,8 +178,8 @@ async def update_yocool(force=False) -> str:
 
     # 删除压缩包
     hoshino.logger.info('清理无用文件')
-    src = work_dir + 'YoCool-' + newest_tag + '-' + themes + '-plugin.zip'
-    os.remove(src)
+    for infile in glob.glob(os.path.join(path, '*.zip')):
+        os.remove(infile)
 
     # 覆盖本地版本号
     hoshino.logger.info(f'更新版本信息：YoCool-{newest_tag}')
@@ -265,7 +265,7 @@ async def install_yocool_chat(session):
     if select == 0:
         await session.finish('尚未安装YoCool主题，请选定主题后再试')
     hoshino.logger.info('获取YoCool最新版本信息')
-    await session.send('正在获取YoCool最新版本信息')
+    await session.send('正在安装YoCool，请稍后……')
     if not os.path.exists(current_info_path):
         newest_yocool_ver = await aiorequests.get(url=newest_info_url, timeout=10)
         if newest_yocool_ver.status_code != 200:
