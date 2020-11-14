@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import hoshino, os, json, shutil, requests, zipfile, asyncio, aiohttp, glob
-from os import stat
+import hoshino, os, json, shutil, zipfile, asyncio, glob
 from nonebot import on_command, get_bot, scheduler
-from requests.sessions import session
-from hoshino import priv, util, aiorequests
+from hoshino import aiorequests, priv, util
 
 
 # 自动更新结果是否通知主人
