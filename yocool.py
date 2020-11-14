@@ -33,15 +33,14 @@ async def get_yocool_file(newest_tag,themes):
     '''
     hoshino.logger.info(f'开始下载YoCool主题{themes}')
     download_url = git_yocool_releases + newest_tag + '/YoCool-'+ newest_tag + '-' + themes + '-plugin.zip'
-    async with aiohttp.ClientSession() as session:
-        async with session.get(download_url) as response:
-            response = await response.read()
-            if int(response.status_code) != 200:
-                hoshino.logger.error(f'下载YoCool最新版本时发生错误{response.status_code}')
-                return {}
-            with open(path + 'public.zip', 'wb') as f:
-                f.write(response)
-        hoshino.logger.info(f'{themes}主题已下载完成')
+    response =  await aiorequests.get(download_url, stream=True, timeout=20)
+    status_code = response.status_code
+    if status_code != 200:
+        hoshino.logger.error(f'下载YoCool最新版本时发生错误{status_code}')
+        return {}
+    content = await response.content
+    with open(path + 'public.zip', 'wb') as f:
+        f.write(content)
     hoshino.logger.info('开始解压缩主题文件')
     zip_files = [file for file in os.listdir(path) if file.endswith('.zip')]
     for zfile in zip_files:
