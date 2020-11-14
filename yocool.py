@@ -21,7 +21,7 @@ current_info_path = './hoshino/modules/yocool/yocool_info.json'
 
 newest_info_url = 'https://api.pcrlink.cn/yocool/yocool_info.json'
 
-git_yocool_releases = 'https://github.com/A-kirami/YoCool/releases/download/'
+git_yocool_releases = 'https://hub.fastgit.org/A-kirami/YoCool/releases/download/'
 
 themes_0 = '主题未设置'
 themes_PA = 'PrincessAdventure'
