@@ -240,7 +240,7 @@ async def uninstall_yocool(force=False) -> str:
     return 5
 
 
-@on_command('一键安装', only_to_me=False)
+@on_command('一键安装', aliases=('快速安装', '一键YoCool', '一键yocool', '一键YOCOOL'), only_to_me=True)
 async def one_key_yocool(session):
     if not priv.check_priv(session.event, priv.SUPERUSER):
         return
@@ -268,7 +268,7 @@ async def one_key_yocool(session):
     with open(current_info_path, 'w+', encoding='utf-8') as f:
         json.dump(yocool_info_json, f, indent=4, ensure_ascii=False)
     themes = get_yocool_themes(select)
-    await session.send(f'YoCool初始化完成，准备使用{themes}主题进行安装')
+    await session.send(f'YoCool初始化完成，准备使用{themes}主题进行安装，安装需要一定时间，请耐心等待……')
     status, version, updatenote = await update_yocool(force=True)
     if status == 0:
         for infile in glob.glob(os.path.join(path, '*.json')):
@@ -280,7 +280,7 @@ async def one_key_yocool(session):
         await session.finish(f'一键安装已完成！\n当前YoCool版本：YoCool-{version}\n使用主题：{themes}\n更新日志：\n{updatenote}\n*电脑端请使用Ctrl+F5强制刷新浏览器缓存，移动端请在浏览器设置中清除缓存')
 
 
-@on_command('切换主题', only_to_me=False)
+@on_command('切换主题', aliases=('更换主题', '变更主题', '修改主题'), only_to_me=True)
 async def set_yocool_themes(session):
     if not priv.check_priv(session.event, priv.SUPERUSER):
         return
@@ -302,20 +302,69 @@ async def set_yocool_themes(session):
         json.dump(current_updata_json, f, indent=4, ensure_ascii=False)
     themes = get_yocool_themes(select)
     hoshino.logger.info(f'设置YoCool主题为{themes}')
+    await session.send('开始切换主题，需要一定时间，请耐心等待……')
     shutil.rmtree(yobot_themes_path)
     await asyncio.sleep(5)
     await update_yocool(force=True)
     await session.finish(f'YoCool主题已切换为{themes}')
 
 
-@on_command('卸载YoCool', only_to_me=False)
+@on_command('更新YoCool', aliases=('更新yocool', '更新YOCOOL', '升级YoCool', '升级yocool', '升级YOCOOL'), only_to_me=True)
+async def update_yocool_chat(session):
+    '''
+    手动更新
+    '''
+    if not priv.check_priv(session.event, priv.SUPERUSER):
+        return
+    ins = get_install_state()
+    if ins == 0:
+        await session.finish('当前未安装YoCool')
+    hoshino.logger.info('开始检查YoCool更新')
+    await session.send('开始进行YoCool更新，需要一定时间，请耐心等待……')
+    try:
+        status, version, updatenote = await update_yocool()
+    except:
+        await session.send('更新异常中断，请排查问题后再次尝试')
+    if status == 0:
+        await session.finish('已是最新版本, 仍要更新YoCool请使用【强制更新YoCool】命令')
+    elif status < 1000:
+        await session.finish(f'发生错误{status}')
+    else:
+        await session.finish(f'更新完成！\n当前YoCool版本：YoCool-{version}\n更新日志：\n{updatenote}\n*电脑端请使用Ctrl+F5强制刷新浏览器缓存，移动端请在浏览器设置中清除缓存')
+
+
+@on_command('强制更新YoCool', aliases=('强制更新yocool', '强制更新YOCOOL', '强制升级YoCool', '强制升级yocool', '强制升级YOCOOL'), only_to_me=True)
+async def update_yocool_force_chat(session):
+    '''
+    强制更新
+    '''
+    if not priv.check_priv(session.event, priv.SUPERUSER):
+        return
+    hoshino.logger.info('开始检查YoCool更新')
+    ins = get_install_state()
+    if ins == 0:
+        await session.finish('当前未安装YoCool')
+    await session.send('开始进行YoCool更新，需要一定时间，请耐心等待……')
+    try:
+        status, version, updatenote = await update_yocool(force=True)
+    except:
+        await session.send('更新异常中断，请排查问题后再次尝试')
+    if status == 0:
+        await session.finish(f'状态{status}')
+    elif status < 1000:
+        await session.finish(f'发生错误{status}')
+    else:
+        await session.finish(f'更新完成！\n当前YoCool版本：YoCool-{version}\n更新日志：\n{updatenote}\n*电脑端请使用Ctrl+F5强制刷新浏览器缓存，移动端请在浏览器设置中清除缓存')
+
+
+@on_command('卸载YoCool', aliases=('卸载yocool', '卸载YOCOOL'), only_to_me=True)
 async def uninstall_yocool_chat(session):
     '''
     卸载
     '''
     if not priv.check_priv(session.event, priv.SUPERUSER):
         return
-    await session.send('YoCool卸载开始，请耐心等待……')
+    await session.send('YoCool卸载开始，需要一定时间，请耐心等待……')
     yocode = await uninstall_yocool()
     if yocode == 0:
         await session.finish('尚未安装YoCool，无法操作')
@@ -330,15 +379,14 @@ async def uninstall_yocool_chat(session):
     else:
         await session.finish('YoCool卸载完成！')
 
-
-@on_command('强制卸载YoCool', only_to_me=False)
+@on_command('强制卸载YoCool', aliases=('强制卸载yocool', '强制卸载YOCOOL'), only_to_me=True)
 async def uninstall_yocool_force_chat(session):
     '''
     强制卸载
     '''
     if not priv.check_priv(session.event, priv.SUPERUSER):
         return
-    await session.send('YoCool强制卸载开始，请耐心等待……')
+    await session.send('YoCool强制卸载开始，需要一定时间，请耐心等待……')
     yocode = await uninstall_yocool(force=True)
     if yocode == 0:
         await session.finish('尚未安装YoCool，无法操作')
@@ -354,53 +402,8 @@ async def uninstall_yocool_force_chat(session):
         await session.finish('YoCool卸载完成！')
 
 
-@on_command('更新YoCool', only_to_me=False)
-async def update_yocool_chat(session):
-    '''
-    手动更新
-    '''
-    if not priv.check_priv(session.event, priv.SUPERUSER):
-        return
-    ins = get_install_state()
-    if ins == 0:
-        await session.finish('当前未安装YoCool')
-    hoshino.logger.info('开始检查YoCool更新')
-    try:
-        status, version, updatenote = await update_yocool()
-    except:
-        await session.send('更新异常中断，请排查问题后再次尝试')
-    if status == 0:
-        await session.finish('已是最新版本, 仍要更新YoCool请使用【强制更新YoCool】命令')
-    elif status < 1000:
-        await session.finish(f'发生错误{status}')
-    else:
-        await session.finish(f'更新完成！\n当前YoCool版本：YoCool-{version}\n更新日志：\n{updatenote}\n*电脑端请使用Ctrl+F5强制刷新浏览器缓存，移动端请在浏览器设置中清除缓存')
-
-
-@on_command('强制更新YoCool', only_to_me=False)
-async def update_yocool_force_chat(session):
-    '''
-    强制更新
-    '''
-    if not priv.check_priv(session.event, priv.SUPERUSER):
-        return
-    hoshino.logger.info('开始检查YoCool更新')
-    ins = get_install_state()
-    if ins == 0:
-        await session.finish('当前未安装YoCool')
-    try:
-        status, version, updatenote = await update_yocool(force=True)
-    except:
-        await session.send('更新异常中断，请排查问题后再次尝试')
-    if status == 0:
-        await session.finish(f'状态{status}')
-    elif status < 1000:
-        await session.finish(f'发生错误{status}')
-    else:
-        await session.finish(f'更新完成！\n当前YoCool版本：YoCool-{version}\n更新日志：\n{updatenote}\n*电脑端请使用Ctrl+F5强制刷新浏览器缓存，移动端请在浏览器设置中清除缓存')
-
-# 每天检查一次，自动进行更新
-@scheduler.scheduled_job('cron', hour='4', minute='40')
+# 每周检查一次，自动进行更新
+@scheduler.scheduled_job('cron',day_of_week='1', hour=4, minute=40)
 async def update_yocool_sdj():
     bot = get_bot()
     master_id = hoshino.config.SUPERUSERS[0]
@@ -408,6 +411,7 @@ async def update_yocool_sdj():
     self_ids = bot._wsr_api_clients.keys()
     sid = self_ids[0]
 
+    ins = get_install_state()
     if ins == 0:
         return
     if not os.path.exists(current_info_path):
