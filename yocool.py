@@ -3,63 +3,51 @@ import hoshino, os, json, shutil, zipfile, asyncio, glob
 from nonebot import on_command, get_bot, scheduler
 from hoshino import aiorequests, priv, util
 
-
 # 自动更新结果是否通知主人
 NOTICE = False
 
-path = './hoshino/modules/yocool/'
+try:
+    config = hoshino.config.yocool.setup_config
+except:
+    hoshino.logger.error('not found config of yocoolconsole')
 
-yobot_themes_path = './hoshino/modules/yobot/yobot/src/client/public'
+try:
+    path  = config.path
+except OSError:
+    path = './hoshino/modules/yocool/'
 
-yocool_themes_path = './hoshino/modules/yocool/public'
+try:
+    yobot_path  = config.path
+except OSError:
+    yobot_path = './hoshino/modules/yobot/yobot/'
 
-backup_themes_path = './hoshino/modules/yocool/backup/public'
-
-current_info_path = './hoshino/modules/yocool/yocool_info.json'
-
-newest_info_url = 'https://api.pcrlink.cn/yocool/yocool_info.json'
-
-git_yocool_releases = 'https://hub.fastgit.org/A-kirami/YoCool/releases/download/'
+yobot_themes_path = yobot_path + 'src/client/public'
+yocool_themes_path = path + 'public'
+backup_themes_path = path + 'backup/public'
+current_info_path = path + 'yocool_info.json'
 
 themes_0 = '主题未设置'
 themes_PA = 'PrincessAdventure'
 themes_CL = 'CoolLite'
 
-async def get_yocool_file(newest_tag,themes):
-    '''
-    获取yocool文件
-    '''
-    hoshino.logger.info(f'开始下载YoCool主题{themes}')
-    download_url = git_yocool_releases + newest_tag + '/YoCool-'+ newest_tag + '-' + themes + '-plugin.zip'
-    response =  await aiorequests.get(download_url, stream=True, timeout=20)
-    status_code = response.status_code
-    if status_code != 200:
-        hoshino.logger.error(f'下载YoCool最新版本时发生错误{status_code}')
-        return {}
-    content = await response.content
-    with open(path + 'public.zip', 'wb') as f:
-        f.write(content)
-    hoshino.logger.info('开始解压缩主题文件')
-    zip_files = [file for file in os.listdir(path) if file.endswith('.zip')]
-    for zfile in zip_files:
-        f = zipfile.ZipFile(os.path.join(path, zfile),'r')
-        for file in f.namelist():
-            f.extract(file,os.path.join(path, zfile[:-4]))
-    hoshino.logger.info('主题文件解压完成')
-    hoshino.logger.info('主题文件准备完毕！')
+newest_info_url = 'https://api.pcrlink.cn/yocool/yocool_info.json'
+git_yocool_releases = 'https://hub.fastgit.org/A-kirami/YoCool/releases/download/'
+
+THEMES_NAME_TIP = '请选择需要切换的主题！\n1. 公主冒险 PrincessAdventure\n2. 轻酷 CoolLite\n*切换主题+序号或名称即可'
 
 
-def get_yocool_themes(select) -> str:
+def get_install_state() -> int:
     '''
-    获取主题对应名称
+    检查安装状态
     '''
-    if select == 1:
-        themes = themes_PA
-    elif select == 2:
-        themes = themes_CL
+    hoshino.logger.info('检查YoCool安装状态')
+    if os.path.exists(current_info_path):
+        with open(current_info_path, 'r', encoding='utf-8') as lv:
+            lvj = json.load(lv)
+            current_tms = int(lvj["Install"])
     else:
-        themes = themes_0
-    return themes
+        current_tms = 0
+    return current_tms
 
 
 def get_current_ver() -> int:
@@ -90,18 +78,17 @@ def get_current_tms() -> int:
     return current_tms
 
 
-def get_install_state() -> int:
+def get_yocool_themes(select) -> str:
     '''
-    检查安装状态
+    获取主题对应名称
     '''
-    hoshino.logger.info('检查YoCool安装状态')
-    if os.path.exists(current_info_path):
-        with open(current_info_path, 'r', encoding='utf-8') as lv:
-            lvj = json.load(lv)
-            current_tms = int(lvj["Install"])
+    if select == 1:
+        themes = themes_PA
+    elif select == 2:
+        themes = themes_CL
     else:
-        current_tms = 0
-    return current_tms
+        themes = themes_0
+    return themes
 
 
 async def get_newest_ver() -> str:
@@ -133,6 +120,30 @@ def update_current_ver(ver,Version,UpdateNote) -> None:
     with open(current_info_path, 'w+', encoding='utf-8') as f:
         json.dump(current_updata_json, f, indent=4, ensure_ascii=False)
     hoshino.logger.info(f'更新本地YoCool信息文件')
+
+
+async def get_yocool_file(newest_tag,themes):
+    '''
+    获取yocool文件
+    '''
+    hoshino.logger.info(f'开始下载YoCool主题{themes}')
+    download_url = git_yocool_releases + newest_tag + '/YoCool-'+ newest_tag + '-' + themes + '-plugin.zip'
+    response =  await aiorequests.get(download_url, stream=True, timeout=20)
+    status_code = response.status_code
+    if status_code != 200:
+        hoshino.logger.error(f'下载YoCool最新版本时发生错误{status_code}')
+        return {}
+    content = await response.content
+    with open(path + 'public.zip', 'wb') as f:
+        f.write(content)
+    hoshino.logger.info('开始解压缩主题文件')
+    zip_files = [file for file in os.listdir(path) if file.endswith('.zip')]
+    for zfile in zip_files:
+        f = zipfile.ZipFile(os.path.join(path, zfile),'r')
+        for file in f.namelist():
+            f.extract(file,os.path.join(path, zfile[:-4]))
+    hoshino.logger.info('主题文件解压完成')
+    hoshino.logger.info('主题文件准备完毕！')
 
 
 async def update_yocool(force=False) -> str:
@@ -188,6 +199,7 @@ async def update_yocool(force=False) -> str:
     update_current_ver(newest_ver, newest_tag, newest_udn)
     return newest_ver, newest_tag, newest_udn
 
+
 async def uninstall_yocool(force=False) -> str:
     '''
     卸载YoCool
@@ -227,13 +239,6 @@ async def uninstall_yocool(force=False) -> str:
         json.dump(current_updata_json, f, indent=4, ensure_ascii=False)
     return 5
 
-@on_command('debug', only_to_me=False)
-async def debug(session):
-    if not priv.check_priv(session.event, priv.SUPERUSER):
-        return
-    with open(current_info_path, 'r', encoding='utf-8') as f:
-        current_updata_json = json.load(f)
-    await session.finish(f'{current_updata_json}')
 
 @on_command('一键安装', only_to_me=False)
 async def one_key_yocool(session):
@@ -274,7 +279,6 @@ async def one_key_yocool(session):
     else:
         await session.finish(f'一键安装已完成！\n当前YoCool版本：YoCool-{version}\n使用主题：{themes}\n更新日志：\n{updatenote}\n*电脑端请使用Ctrl+F5强制刷新浏览器缓存，移动端请在浏览器设置中清除缓存')
 
-THEMES_NAME_TIP = '请选择主题设置！'
 
 @on_command('切换主题', only_to_me=False)
 async def set_yocool_themes(session):
@@ -325,6 +329,7 @@ async def uninstall_yocool_chat(session):
         await session.finish('清理残留出错，请手动删除backup文件夹')
     else:
         await session.finish('YoCool卸载完成！')
+
 
 @on_command('强制卸载YoCool', only_to_me=False)
 async def uninstall_yocool_force_chat(session):
@@ -380,9 +385,9 @@ async def update_yocool_force_chat(session):
     if not priv.check_priv(session.event, priv.SUPERUSER):
         return
     hoshino.logger.info('开始检查YoCool更新')
-    select = get_current_tms()
-    if select == 0:
-        await session.finish('尚未安装YoCool主题，请选定主题安装后再试')
+    ins = get_install_state()
+    if ins == 0:
+        await session.finish('当前未安装YoCool')
     try:
         status, version, updatenote = await update_yocool(force=True)
     except:
@@ -403,6 +408,16 @@ async def update_yocool_sdj():
     self_ids = bot._wsr_api_clients.keys()
     sid = self_ids[0]
 
+    if ins == 0:
+        return
+    if not os.path.exists(current_info_path):
+        newest_yocool_ver = await aiorequests.get(url=newest_info_url)
+        if newest_yocool_ver.status_code != 200:
+            hoshino.logger.error(f'获取YoCool版本信息时发生错误{newest_yocool_ver.status_code}')
+        yocool_info_json = await newest_yocool_ver.json()
+        yocool_info_json['Themes'] = 1
+        with open(current_info_path, 'w+', encoding='utf-8') as f:
+            json.dump(yocool_info_json, f, indent=4, ensure_ascii=False)
     status, version, UpdateNote = await update_yocool()
     if status == 0:
         return
