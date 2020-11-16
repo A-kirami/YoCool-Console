@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import hoshino, os, json, shutil, zipfile, asyncio, glob
 from nonebot import on_command, get_bot, scheduler
-from hoshino import aiorequests, priv, util
+from hoshino import aiorequests, util
 
 # 自动更新结果是否通知主人
 NOTICE = False
@@ -13,18 +13,18 @@ except:
 
 try:
     path  = config.path
-except OSError:
-    path = './hoshino/modules/yocool/'
+except:
+    path = os.path.dirname(__file__)
 
 try:
     yobot_path  = config.path
-except OSError:
+except:
     yobot_path = './hoshino/modules/yobot/yobot/'
 
-yobot_themes_path = yobot_path + 'src/client/public'
-yocool_themes_path = path + 'public'
-backup_themes_path = path + 'backup/public'
-current_info_path = path + 'yocool_info.json'
+yobot_themes_path = os.path.join(yobot_path, 'src', 'client', 'public')
+yocool_themes_path = os.path.join(path, 'public')
+backup_themes_path = os.path.join(path, 'backup', 'public')
+current_info_path = os.path.join(path, 'yocool_info.json')
 
 themes_0 = '主题未设置'
 themes_PA = 'PrincessAdventure'
@@ -242,7 +242,8 @@ async def uninstall_yocool(force=False) -> str:
 
 @on_command('一键安装', aliases=('快速安装', '一键YoCool', '一键yocool', '一键YOCOOL'), only_to_me=True)
 async def one_key_yocool(session):
-    if not priv.check_priv(session.event, priv.SUPERUSER):
+    uid = session.event.user_id
+    if uid not in hoshino.config.SUPERUSERS:
         return
     if os.path.exists(backup_themes_path):
         await session.finish('您已经安装过了，如需更新请发送【更新YoCool】')
@@ -282,7 +283,8 @@ async def one_key_yocool(session):
 
 @on_command('切换主题', aliases=('更换主题', '变更主题', '修改主题'), only_to_me=True)
 async def set_yocool_themes(session):
-    if not priv.check_priv(session.event, priv.SUPERUSER):
+    uid = session.event.user_id
+    if uid not in hoshino.config.SUPERUSERS:
         return
     if not os.path.exists(current_info_path):
         await session.send('没有找到YoCool信息配置文件，请发送【安装YoCool】后再试')
@@ -314,7 +316,8 @@ async def update_yocool_chat(session):
     '''
     手动更新
     '''
-    if not priv.check_priv(session.event, priv.SUPERUSER):
+    uid = session.event.user_id
+    if uid not in hoshino.config.SUPERUSERS:
         return
     ins = get_install_state()
     if ins == 0:
@@ -338,7 +341,8 @@ async def update_yocool_force_chat(session):
     '''
     强制更新
     '''
-    if not priv.check_priv(session.event, priv.SUPERUSER):
+    uid = session.event.user_id
+    if uid not in hoshino.config.SUPERUSERS:
         return
     hoshino.logger.info('开始检查YoCool更新')
     ins = get_install_state()
@@ -362,7 +366,8 @@ async def uninstall_yocool_chat(session):
     '''
     卸载
     '''
-    if not priv.check_priv(session.event, priv.SUPERUSER):
+    uid = session.event.user_id
+    if uid not in hoshino.config.SUPERUSERS:
         return
     await session.send('YoCool卸载开始，需要一定时间，请耐心等待……')
     yocode = await uninstall_yocool()
@@ -384,7 +389,8 @@ async def uninstall_yocool_force_chat(session):
     '''
     强制卸载
     '''
-    if not priv.check_priv(session.event, priv.SUPERUSER):
+    uid = session.event.user_id
+    if uid not in hoshino.config.SUPERUSERS:
         return
     await session.send('YoCool强制卸载开始，需要一定时间，请耐心等待……')
     yocode = await uninstall_yocool(force=True)
