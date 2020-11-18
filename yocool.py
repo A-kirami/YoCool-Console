@@ -134,7 +134,7 @@ async def get_yocool_file(newest_tag,themes):
         hoshino.logger.error(f'下载YoCool最新版本时发生错误{status_code}')
         return {}
     content = await response.content
-    with open(path + 'public.zip', 'wb') as f:
+    with open(path + '/public.zip', 'wb') as f:
         f.write(content)
     hoshino.logger.info('开始解压缩主题文件')
     zip_files = [file for file in os.listdir(path) if file.endswith('.zip')]
