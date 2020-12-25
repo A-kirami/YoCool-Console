@@ -30,7 +30,7 @@ themes_0 = '主题未设置'
 themes_PA = 'PrincessAdventure'
 themes_CL = 'CoolLite'
 
-newest_info_url = 'https://api.pcrlink.cn/yocool/yocool_info.json'
+newest_info_url = 'https://yocool.pcrlink.cn/yocool_info.json'
 git_yocool_releases = 'https://hub.fastgit.org/A-kirami/YoCool/releases/download/'
 
 THEMES_NAME_TIP = '请选择需要切换的主题！\n1. 公主冒险 PrincessAdventure\n2. 轻酷 CoolLite\n*切换主题+序号或名称即可'
