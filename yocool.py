@@ -175,7 +175,7 @@ async def update_yocool(force=False) -> str:
     # 下载文件
     getcode = await get_yocool_file(newest_tag,themes)
     if getcode == {}:
-        hoshino.error(f'下载YoCool文件时发生错误')
+        hoshino.logger.error(f'下载YoCool文件时发生错误')
         return -1, newest_tag, newest_udn
 
     # 旧文件备份文件
