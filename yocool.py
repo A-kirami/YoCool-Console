@@ -127,7 +127,7 @@ async def get_yocool_file(newest_tag,themes):
     获取yocool文件
     '''
     hoshino.logger.info(f'开始下载YoCool主题{themes}')
-    download_url = git_yocool_releases + newest_tag + '/YoCool-'+ newest_tag + '-' + themes + '-plugin.zip'
+    download_url = git_yocool_releases + newest_tag + '/YoCool-'+ newest_tag + '-' + themes + '-yocool.zip'
     response =  await aiorequests.get(download_url, stream=True, timeout=20)
     status_code = response.status_code
     if status_code != 200:
