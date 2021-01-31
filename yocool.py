@@ -17,7 +17,7 @@ except:
     path = os.path.dirname(__file__)
 
 try:
-    yobot_path  = config.path
+    yobot_path  = config.yobot_path
 except:
     yobot_path = './hoshino/modules/yobot/yobot/'
 
