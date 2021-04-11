@@ -32,7 +32,7 @@
     ```
 3. 修改``_bot_.py``，在``MODULES_ON``中添加``YoCool-Console``
 
-4. 【插件版跳过本步骤】复制``yocool.py.example``到``config``文件夹，重命名为``yocool.py``，打开后按照注释进行配置
+4. 【插件版跳过本步骤】复制``YoCool-Console.py.example``到``config``文件夹，重命名为``YoCool-Console.py``，打开后按照注释进行配置
 
 5. 重启HoshinoBot
 
@@ -43,7 +43,7 @@
     ```
     hsn install yocool
     ```
-2. 【插件版跳过本步骤】复制``yocool.py.example``到``config``文件夹，重命名为``yocool.py``，打开后按照注释进行配置
+2. 【插件版跳过本步骤】复制``YoCool-Console.py.example``到``config``文件夹，重命名为``YoCool-Console.py``，打开后按照注释进行配置
 
 3. 重启HoshinoBot
 
