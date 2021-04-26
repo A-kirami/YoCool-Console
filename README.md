@@ -32,7 +32,7 @@
     ```
 3. 修改``_bot_.py``，在``MODULES_ON``中添加``YoCool-Console``
 
-4. 【插件版跳过本步骤】复制``YoCool-Console.py.example``到``config``文件夹，重命名为``YoCool-Console.py``，打开后按照注释进行配置
+4. （插件版跳过本步骤）打开``yocool.py``，参照注释修改第12行的配置
 
 5. 重启HoshinoBot
 
@@ -43,7 +43,7 @@
     ```
     hsn install yocool
     ```
-2. 【插件版跳过本步骤】复制``YoCool-Console.py.example``到``config``文件夹，重命名为``YoCool-Console.py``，打开后按照注释进行配置
+2. （插件版跳过本步骤）打开``yocool.py``，参照注释修改第12行的配置
 
 3. 重启HoshinoBot
 
@@ -52,8 +52,8 @@
 以下指令请私聊Bot进行操作（目前仅支持主题PrincessAdventure，CoolLite尚在开发中）
 |指令|说明|
 |-----|-----|
-|一键安装|使用默认主题快速安装YoCool，也可使用``一键安装 主题名``来指定安装哪个主题|
-|切换主题|切换YoCool的主题，使用``切换主题 主题名``来选择切换到哪个主题|
+|一键安装|使用默认主题快速安装YoCool，也可使用``一键安装 序号``来指定安装的主题|
+|切换主题|查看YoCool的主题列表，使用``切换主题 序号``来选择切换的主题|
 |更新YoCool|更新YoCool到最新版本，指令前带``强制``可以强制执行本条指令|
 |卸载YoCool|将YoCool从yobot中卸载，指令前带``强制``可以强制执行本条指令|
 
