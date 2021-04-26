@@ -243,7 +243,7 @@ async def one_key_yocool(session):
         await session.finish('您已经安装过了，如需更新请发送【更新YoCool】')
     name = util.normalize_str(session.current_arg_text)
     if not name:
-        await session.finish(themes_tip, at_sender=True)
+        select = 1
     else:
         if f"{name}" in themes_list:
             select = name
